@@ -3,34 +3,677 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ice Cream Heaven</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Dead & Company Concert Tracker</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the webapp */
+        .text-transparent {
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Ice Cream Heaven</h1>
-    </header>
+    <div id="root"></div>
 
-    <div class="container">
-        <img src="ice-cream.jpg" alt="Delicious Ice Cream" width="512" height="512">
+    <script type="text/babel">
+        const { useState, useMemo } = React;
 
-        <!-- Two Short Paragraphs -->
-        <p>Ice cream is a sweet, creamy dessert made from a mixture of dairy products and other ingredients such as sugar, flavorings, and sometimes stabilizers.</p>
-        <p>It's been enjoyed for centuries and comes in countless flavors, from classic vanilla to unique combinations like lavender and rose petals or matcha green tea.</p>
-    </div>
+        // Lucide React icons as SVG components
+        const Calendar = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        );
 
-    <ul class="list">
-        <li>Famous Ice Cream Brands: Ben & Jerry's, Haagen-Dazs, Baskin Robbins</li>
-        <li>Popular Flavors: Vanilla, Chocolate, Strawberry, Mint Chip</li>
-        <li>Toppings: Sprinkles, Cherries, Caramel Sauce, Whipped Cream</li>
-        <li>Serving Suggestions: With cones, in cups, or as a sundae</li>
-    </ul>
+        const MapPin = () => (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+        );
 
-    <footer>
-        <address>Contact Me: <a href="mailto:troman9@mail.ccsf.edu">troman9@mail.ccsf.edu</a></address>
-    </footer>
+        const Music = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+        );
 
-   
-    <p><a href="https://www.imdb.com/title/tt0437658/">Watch Classic Films!</a></p>
+        const Users = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        );
+
+        const Search = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M21 21l-4.35-4.35"></path>
+            </svg>
+        );
+
+        const Filter = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+            </svg>
+        );
+
+        const DeadCompanySetlists = () => {
+            const [selectedShow, setSelectedShow] = useState(null);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterBy, setFilterBy] = useState('all');
+            
+            const chasingSongs = [
+                { name: "Ripple", priority: "top", note: "My #1 most wanted song!" },
+                { name: "Dire Wolf", priority: "high", note: "" },
+                { name: "Golden Road (To Unlimited Devotion)", priority: "high", note: "" },
+                { name: "Dark Star", priority: "high", note: "The ultimate psychedelic journey" },
+                { name: "Death Don't Have No Mercy", priority: "medium", note: "Haunting traditional, very rare" },
+                { name: "Uncle John's Band", priority: "medium", note: "Perfect for Golden Gate Park!" },
+                { name: "Attics of My Life", priority: "medium", note: "Beautiful, rarely played ballad" },
+                { name: "Box of Rain", priority: "medium", note: "Emotional tribute song" },
+                { name: "Cosmic Charlie", priority: "medium", note: "Early experimental Dead gem" },
+                { name: "The Harder They Come", priority: "medium", note: "Classic JGB reggae cover" },
+                { name: "Cats Under the Stars", priority: "medium", note: "Beautiful JGB ballad" },
+                { name: "Ruben and Cherise", priority: "medium", note: "Storytelling JGB song" },
+                { name: "How Sweet It Is (To Be Loved by You)", priority: "medium", note: "Joyful JGB cover" }
+            ];
+
+            const shows = [
+                {
+                    id: 1,
+                    date: "July 16, 2023",
+                    venue: "Oracle Park",
+                    location: "San Francisco, CA",
+                    tour: "The Final Tour",
+                    note: "Final show of Dead & Company's 'Final Tour'",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Bertha", segue: ">" },
+                            { song: "Good Lovin'", segue: ">" },
+                            { song: "Loser", segue: "" },
+                            { song: "High Time", segue: "" },
+                            { song: "Samson and Delilah", segue: "" },
+                            { song: "Althea", segue: "" },
+                            { song: "Dear Mr. Fantasy", segue: ">" },
+                            { song: "Hey Jude", note: "(coda only)", segue: ">" },
+                            { song: "Bird Song", segue: "" }
+                        ],
+                        "Set 2": [
+                            { song: "Help on the Way", segue: ">" },
+                            { song: "Slipknot!", segue: ">" },
+                            { song: "Franklin's Tower", segue: "" },
+                            { song: "Estimated Prophet", segue: ">" },
+                            { song: "Eyes of the World", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: ">" },
+                            { song: "Days Between", segue: "" },
+                            { song: "Cumberland Blues", segue: ">" },
+                            { song: "Sugar Magnolia", segue: "" }
+                        ],
+                        "Encore": [
+                            { song: "Truckin'", segue: ">" },
+                            { song: "Brokedown Palace", segue: "" },
+                            { song: "Not Fade Away", note: "(partial)", segue: "" }
+                        ]
+                    }
+                },
+                {
+                    id: 2,
+                    date: "May 18, 2024",
+                    venue: "Sphere at The Venetian Resort",
+                    location: "Las Vegas, NV",
+                    tour: "Dead Forever - Live at Sphere",
+                    note: "",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Good Times", cover: "Sam Cooke" },
+                            { song: "Truckin'", segue: ">" },
+                            { song: "Smokestack Lightning", cover: "Howlin' Wolf" },
+                            { song: "Sugaree", cover: "Jerry Garcia" },
+                            { song: "Loose Lucy", segue: "" },
+                            { song: "Ship of Fools", segue: "" },
+                            { song: "Tennessee Jed", segue: "" },
+                            { song: "Casey Jones", segue: "" }
+                        ],
+                        "Set 2": [
+                            { song: "Scarlet Begonias", segue: ">" },
+                            { song: "Fire on the Mountain", segue: "" },
+                            { song: "Eyes of the World", segue: ">" },
+                            { song: "Terrapin Station", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: ">" },
+                            { song: "Stella Blue", segue: "" },
+                            { song: "The Wheel", cover: "Jerry Garcia" },
+                            { song: "Going Down the Road Feeling Bad", cover: "traditional" },
+                            { song: "Throwing Stones", segue: "" },
+                            { song: "One More Saturday Night", cover: "Bob Weir" }
+                        ]
+                    }
+                },
+                {
+                    id: 3,
+                    date: "May 25, 2024",
+                    venue: "Sphere at The Venetian Resort",
+                    location: "Las Vegas, NV",
+                    tour: "Dead Forever - Live at Sphere",
+                    note: "First 'Maggie's Farm' since 2016",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Bertha", segue: "" },
+                            { song: "Mississippi Half-Step Uptown Toodeloo", segue: "" },
+                            { song: "Dancing in the Street", cover: "Martha Reeves and the Vandellas" },
+                            { song: "Good Lovin'", cover: "The Olympics" },
+                            { song: "Maggie's Farm", cover: "Bob Dylan", note: "(First time since 2016)" },
+                            { song: "Deal", cover: "Jerry Garcia" }
+                        ],
+                        "Set 2": [
+                            { song: "Shakedown Street", segue: "" },
+                            { song: "China Cat Sunflower", segue: ">" },
+                            { song: "I Know You Rider", cover: "traditional" },
+                            { song: "Eyes of the World", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: ">" },
+                            { song: "Black Peter", segue: "" },
+                            { song: "Brown-Eyed Women", segue: ">" },
+                            { song: "Hell in a Bucket", segue: "" },
+                            { song: "Throwing Stones", segue: "" },
+                            { song: "Casey Jones", segue: "" }
+                        ]
+                    }
+                },
+                {
+                    id: 4,
+                    date: "March 20, 2025",
+                    venue: "Sphere at The Venetian Resort",
+                    location: "Las Vegas, NV",
+                    tour: "Dead Forever - Live at Sphere",
+                    note: "Opening night of 2025 Sphere residency",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Gimme Some Lovin'", cover: "The Spencer Davis Group", note: "(Live debut by D&C)" },
+                            { song: "Mississippi Half-Step Uptown Toodeloo", segue: "" },
+                            { song: "Bertha", segue: "" },
+                            { song: "New Speedway Boogie", segue: "" },
+                            { song: "Brown-Eyed Women", segue: "" },
+                            { song: "Good Lovin'", cover: "The Olympics" },
+                            { song: "Don't Ease Me In", cover: "Henry Thomas" }
+                        ],
+                        "Set 2": [
+                            { song: "Feel Like a Stranger", segue: "" },
+                            { song: "Scarlet Begonias", segue: "" },
+                            { song: "Fire on the Mountain", note: "(With Mickey's rap)", segue: "" },
+                            { song: "Terrapin Station", segue: "" },
+                            { song: "Drums", note: "(Mickey Hart on balafon)", segue: ">" },
+                            { song: "Space", segue: "" },
+                            { song: "Standing on the Moon", segue: "" },
+                            { song: "Althea", segue: "" },
+                            { song: "Going Down the Road Feeling Bad", cover: "traditional" },
+                            { song: "Knockin' on Heaven's Door", cover: "Bob Dylan" },
+                            { song: "Touch of Grey", segue: "" }
+                        ]
+                    }
+                },
+                {
+                    id: 5,
+                    date: "March 21, 2025",
+                    venue: "Sphere at The Venetian Resort",
+                    location: "Las Vegas, NV",
+                    tour: "Dead Forever - Live at Sphere",
+                    note: "Live debut of 'Lay Down Sally'",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Cold Rain and Snow", cover: "traditional" },
+                            { song: "Shakedown Street", segue: "" },
+                            { song: "Cumberland Blues", segue: "" },
+                            { song: "Lay Down Sally", cover: "Eric Clapton", note: "(Live debut by D&C)" },
+                            { song: "Tennessee Jed", segue: "" },
+                            { song: "Sugaree", cover: "Jerry Garcia" }
+                        ],
+                        "Set 2": [
+                            { song: "Uncle John's Band", segue: "" },
+                            { song: "Estimated Prophet", segue: ">" },
+                            { song: "Eyes of the World", segue: "" },
+                            { song: "St. Stephen", segue: "> with The Eleven tease" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: "> with Oteil solo jam" },
+                            { song: "Wharf Rat", segue: "" },
+                            { song: "U.S. Blues", segue: "" },
+                            { song: "Throwing Stones", segue: "" },
+                            { song: "Casey Jones", segue: "" }
+                        ]
+                    }
+                },
+                {
+                    id: 6,
+                    date: "March 22, 2025",
+                    venue: "Sphere at The Venetian Resort",
+                    location: "Las Vegas, NV",
+                    tour: "Dead Forever - Live at Sphere",
+                    note: "Featured Phil Lesh tribute with Box of Rain",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Minglewood Blues", cover: "Cannon's Jug Stompers" },
+                            { song: "Franklin's Tower", segue: "" },
+                            { song: "Jack Straw", segue: "" },
+                            { song: "Big Railroad Blues", cover: "Cannon's Jug Stompers" },
+                            { song: "Cassidy", cover: "Bob Weir" },
+                            { song: "Deal", cover: "Jerry Garcia" }
+                        ],
+                        "Set 2": [
+                            { song: "China Cat Sunflower", segue: ">" },
+                            { song: "I Know You Rider", cover: "traditional" },
+                            { song: "Help on the Way", segue: ">" },
+                            { song: "Slipknot!", segue: ">" },
+                            { song: "He's Gone", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: ">" },
+                            { song: "Stella Blue", segue: "" },
+                            { song: "Playing in the Band", segue: "" },
+                            { song: "Morning Dew", cover: "Bonnie Dobson" },
+                            { song: "Box of Rain", note: "(Tribute to Phil Lesh, FTP since his passing in 2024)" }
+                        ]
+                    }
+                },
+                {
+                    id: 7,
+                    date: "August 1, 2025",
+                    venue: "Golden Gate Park",
+                    location: "San Francisco, CA",
+                    tour: "Celebrating 60 Years of the Grateful Dead's Music",
+                    note: "60th Anniversary with Grahame Lesh & Billy Strings",
+                    setlist: {
+                        "Set 1": [
+                            { song: "Feel Like a Stranger", segue: "" },
+                            { song: "Dancing in the Street", cover: "Martha Reeves and the Vandellas", segue: ">" },
+                            { song: "Tennessee Jed", segue: "" },
+                            { song: "Mississippi Half-Step Uptown Toodeloo", segue: ">" },
+                            { song: "Big River", cover: "Johnny Cash", segue: "" },
+                            { song: "Althea", segue: "" }
+                        ],
+                        "Set 2": [
+                            { song: "Box of Rain", note: "(with Grahame Lesh on vocals, playing Phil's bass 'Big Brown')", segue: "" },
+                            { song: "Playing in the Band", note: "(with Grahame Lesh, elements of Miles Davis' 'All Blues')", segue: ">" },
+                            { song: "Estimated Prophet", segue: ">" },
+                            { song: "Eyes of the World", note: "(With Oteil bass solo)", segue: ">" },
+                            { song: "Terrapin Station", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", segue: ">" },
+                            { song: "Wharf Rat", note: "(with Billy Strings, elements of 'The Other One')", segue: "" },
+                            { song: "Not Fade Away", cover: "The Crickets", segue: "" }
+                        ],
+                        "Encore": [
+                            { song: "Knockin' on Heaven's Door", cover: "Bob Dylan", segue: "" }
+                        ]
+                    }
+                },
+                {
+                    id: 8,
+                    date: "August 2, 2025",
+                    venue: "Golden Gate Park",
+                    location: "San Francisco, CA",
+                    tour: "Celebrating 60 Years of the Grateful Dead's Music",
+                    note: "60th Anniversary with Sturgill Simpson & Grahame Lesh",
+                    setlist: {
+                        "Set 1": [
+                            { song: "In the Midnight Hour", cover: "Wilson Pickett", segue: "" },
+                            { song: "Bertha", segue: ">" },
+                            { song: "Jack Straw", note: "(Blue Sky Tease)", segue: "" },
+                            { song: "Dear Mr. Fantasy", cover: "Traffic", segue: ">" },
+                            { song: "Hey Jude", cover: "The Beatles", note: "(Coda only)", segue: "" },
+                            { song: "Passenger", segue: "" },
+                            { song: "Brown-Eyed Women", segue: "" },
+                            { song: "Morning Dew", cover: "Bonnie Dobson", note: "(with Sturgill Simpson)", segue: "" }
+                        ],
+                        "Set 2": [
+                            { song: "Uncle John's Band", note: "(with 'The Other One' jam)", segue: ">" },
+                            { song: "Help on the Way", segue: ">" },
+                            { song: "Slipknot!", note: "(with Ghostbusters teases)", segue: ">" },
+                            { song: "Franklin's Tower", note: "(with 'Lucy in the Sky With Diamonds' tease)", segue: "" },
+                            { song: "St. Stephen", note: "(with Grahame Lesh, 'The Eleven' tease)", segue: ">" },
+                            { song: "Drums", segue: ">" },
+                            { song: "Space", note: "(with 'Shine On You Crazy Diamond' tease)", segue: ">" },
+                            { song: "Spanish Jam", segue: ">" },
+                            { song: "Days Between", segue: ">" },
+                            { song: "Truckin'", note: "(with 'All Blues' tease during 'The Other One' intro jam)", segue: ">" },
+                            { song: "Cold Rain and Snow", cover: "traditional", segue: "" },
+                            { song: "Brokedown Palace", segue: "" }
+                        ]
+                    }
+                }
+            ];
+
+            const allSongs = useMemo(() => {
+                const songMap = new Map();
+                shows.forEach(show => {
+                    Object.values(show.setlist).forEach(setSongs => {
+                        setSongs.forEach(songData => {
+                            const key = songData.song;
+                            if (!songMap.has(key)) {
+                                songMap.set(key, {
+                                    name: songData.song,
+                                    performances: [],
+                                    cover: songData.cover || null,
+                                    isOpener: false,
+                                    isEncore: false
+                                });
+                            }
+                            const songInfo = songMap.get(key);
+                            songInfo.performances.push({
+                                date: show.date,
+                                venue: show.venue,
+                                location: show.location,
+                                setType: Object.keys(show.setlist).find(setType => 
+                                    show.setlist[setType].some(s => s.song === songData.song)
+                                ),
+                                note: songData.note || ""
+                            });
+                            
+                            if (Object.keys(show.setlist)[0] && show.setlist[Object.keys(show.setlist)[0]][0]?.song === songData.song) {
+                                songInfo.isOpener = true;
+                            }
+                            if (show.setlist.Encore && show.setlist.Encore.some(s => s.song === songData.song)) {
+                                songInfo.isEncore = true;
+                            }
+                        });
+                    });
+                });
+                return Array.from(songMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+            }, [shows]);
+
+            const filteredSongs = useMemo(() => {
+                let filtered = allSongs.filter(song => 
+                    song.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                switch (filterBy) {
+                    case 'opener':
+                        filtered = filtered.filter(song => song.isOpener);
+                        break;
+                    case 'encore':
+                        filtered = filtered.filter(song => song.isEncore);
+                        break;
+                    case 'cover':
+                        filtered = filtered.filter(song => song.cover);
+                        break;
+                    default:
+                        break;
+                }
+
+                return filtered;
+            }, [allSongs, searchTerm, filterBy]);
+
+            const totalSongs = allSongs.length;
+            const totalShows = shows.length;
+            const totalCovers = allSongs.filter(song => song.cover).length;
+            const chasingSongsHeard = chasingSongs.filter(chasingSong => 
+                allSongs.some(heardSong => heardSong.name === chasingSong.name)
+            ).length;
+
+            return React.createElement('div', { className: "min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white p-6" },
+                React.createElement('div', { className: "max-w-7xl mx-auto" },
+                    // Header
+                    React.createElement('div', { className: "text-center mb-8" },
+                        React.createElement('h1', { 
+                            className: "text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-red-500 text-transparent",
+                            style: { backgroundClip: 'text', WebkitBackgroundClip: 'text' }
+                        }, "Dead & Company"),
+                        React.createElement('p', { className: "text-xl text-gray-300 mb-2" }, "Concert Setlists & Songs"),
+                        React.createElement('div', { className: "flex justify-center space-x-8 text-sm text-gray-400" },
+                            React.createElement('span', { className: "flex items-center gap-1" },
+                                React.createElement(Calendar),
+                                `${totalShows} Shows`
+                            ),
+                            React.createElement('span', { className: "flex items-center gap-1" },
+                                React.createElement(Music),
+                                `${totalSongs} Unique Songs`
+                            ),
+                            React.createElement('span', { className: "flex items-center gap-1" },
+                                React.createElement(Users),
+                                `${totalCovers} Covers`
+                            ),
+                            React.createElement('span', { className: "flex items-center gap-1" },
+                                React.createElement(Music),
+                                `${chasingSongsHeard}/${chasingSongs.length} Chase Songs`
+                            )
+                        )
+                    ),
+
+                    // Show Selection
+                    React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" },
+                        shows.map(show => 
+                            React.createElement('div', {
+                                key: show.id,
+                                onClick: () => setSelectedShow(selectedShow === show.id ? null : show.id),
+                                className: `cursor-pointer p-4 rounded-lg border-2 transition-all duration-300 ${
+                                    selectedShow === show.id
+                                        ? 'border-yellow-400 bg-yellow-400/10 shadow-lg shadow-yellow-400/25'
+                                        : 'border-gray-600 bg-gray-800/50 hover:border-gray-400 hover:bg-gray-800/70'
+                                }`
+                            },
+                                React.createElement('div', { className: "flex items-start justify-between mb-2" },
+                                    React.createElement('div', null,
+                                        React.createElement('div', { className: "text-lg font-semibold text-yellow-400" }, show.date),
+                                        React.createElement('div', { className: "text-sm text-gray-300" }, show.venue),
+                                        React.createElement('div', { className: "text-xs text-gray-400 flex items-center gap-1" },
+                                            React.createElement(MapPin),
+                                            show.location
+                                        )
+                                    ),
+                                    React.createElement('div', { className: "text-right" },
+                                        React.createElement('div', { className: "text-xs text-gray-400" }, show.tour),
+                                        React.createElement('div', { className: "text-xs text-blue-400 mt-1" },
+                                            `${Object.values(show.setlist).reduce((total, set) => total + set.length, 0)} songs`
+                                        )
+                                    )
+                                ),
+                                show.note && React.createElement('div', { className: "text-xs text-orange-400 mt-2 italic" }, show.note)
+                            )
+                        )
+                    ),
+
+                    // Songs I'm Chasing Section
+                    React.createElement('div', { className: "mb-8 bg-gradient-to-r from-orange-900/50 to-red-900/50 rounded-lg p-6 border-2 border-orange-500/50" },
+                        React.createElement('h2', { className: "text-2xl font-bold mb-4 text-orange-400 flex items-center gap-2" },
+                            React.createElement(Music),
+                            "Songs I'm Chasing"
+                        ),
+                        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
+                            chasingSongs.map((chasingSong, index) => {
+                                const isHeard = allSongs.some(heardSong => heardSong.name === chasingSong.name);
+                                const heardSong = allSongs.find(heardSong => heardSong.name === chasingSong.name);
+                                
+                                let textColor = 'text-gray-300';
+                                if (isHeard) textColor = 'text-green-400';
+                                else if (chasingSong.priority === 'top') textColor = 'text-yellow-400';
+                                else if (chasingSong.priority === 'high') textColor = 'text-orange-400';
+                                
+                                return React.createElement('div', {
+                                    key: index,
+                                    className: `p-4 rounded-lg border-2 transition-all duration-300 ${
+                                        isHeard
+                                            ? 'border-green-500 bg-green-500/10 shadow-lg shadow-green-500/25'
+                                            : chasingSong.priority === 'top'
+                                            ? 'border-yellow-500 bg-yellow-500/10 shadow-lg shadow-yellow-500/25'
+                                            : 'border-orange-500 bg-orange-500/10'
+                                    }`
+                                },
+                                    React.createElement('div', { className: "flex items-start justify-between mb-2" },
+                                        React.createElement('h3', { className: `font-semibold ${textColor}` }, chasingSong.name),
+                                        React.createElement('div', { className: "flex gap-1" },
+                                            chasingSong.priority === 'top' && React.createElement('span', { 
+                                                className: "text-xs bg-yellow-600 px-2 py-1 rounded text-white" 
+                                            }, "#1 WANT"),
+                                            chasingSong.priority === 'high' && !isHeard && React.createElement('span', { 
+                                                className: "text-xs bg-orange-600 px-2 py-1 rounded text-white" 
+                                            }, "HIGH"),
+                                            isHeard && React.createElement('span', { 
+                                                className: "text-xs bg-green-600 px-2 py-1 rounded text-white" 
+                                            }, "HEARD!")
+                                        )
+                                    ),
+                                    
+                                    chasingSong.note && React.createElement('div', { 
+                                        className: "text-xs text-gray-300 mb-2 italic" 
+                                    }, chasingSong.note),
+                                    
+                                    isHeard ? React.createElement('div', { className: "space-y-1" },
+                                        React.createElement('div', { className: "text-xs text-green-400 font-semibold" },
+                                            `Heard ${heardSong.performances.length} time${heardSong.performances.length !== 1 ? 's' : ''}:`
+                                        ),
+                                        heardSong.performances.map((perf, perfIndex) =>
+                                            React.createElement('div', { key: perfIndex, className: "text-xs text-gray-300" },
+                                                React.createElement('span', { className: "text-yellow-500" }, perf.date),
+                                                ` • ${perf.setType}`
+                                            )
+                                        )
+                                    ) : React.createElement('div', { className: "text-xs text-gray-400" },
+                                        "Still waiting to hear this one... 🤞"
+                                    )
+                                );
+                            })
+                        ),
+                        
+                        React.createElement('div', { className: "mt-4 text-center" },
+                            React.createElement('div', { className: "text-sm text-gray-300" },
+                                "Progress: ",
+                                React.createElement('span', { className: "text-orange-400 font-semibold" }, chasingSongsHeard),
+                                " of ",
+                                React.createElement('span', { className: "text-orange-400 font-semibold" }, chasingSongs.length),
+                                " chase songs heard"
+                            ),
+                            React.createElement('div', { className: "w-full bg-gray-700 rounded-full h-2 mt-2" },
+                                React.createElement('div', { 
+                                    className: "bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full transition-all duration-500",
+                                    style: { width: `${(chasingSongsHeard / chasingSongs.length) * 100}%` }
+                                })
+                            )
+                        )
+                    ),
+
+                    // Show Details
+                    selectedShow && (() => {
+                        const show = shows.find(s => s.id === selectedShow);
+                        return React.createElement('div', { className: "mb-8 bg-gray-800/50 rounded-lg p-6 border border-gray-600" },
+                            React.createElement('h2', { className: "text-2xl font-bold mb-4 text-yellow-400" },
+                                `${show.date} - ${show.venue}`
+                            ),
+                            React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" },
+                                Object.entries(show.setlist).map(([setName, songs]) =>
+                                    React.createElement('div', { key: setName, className: "bg-gray-900/50 rounded-lg p-4" },
+                                        React.createElement('h3', { className: "text-lg font-semibold mb-3 text-blue-400 border-b border-gray-600 pb-1" },
+                                            setName
+                                        ),
+                                        React.createElement('div', { className: "space-y-2" },
+                                            songs.map((songData, index) =>
+                                                React.createElement('div', { key: index, className: "flex items-center justify-between" },
+                                                    React.createElement('div', { className: "flex items-center space-x-2" },
+                                                        React.createElement('span', { className: "text-gray-400 text-xs w-6" }, `${index + 1}.`),
+                                                        React.createElement('span', { className: "text-white" }, songData.song),
+                                                        songData.segue && React.createElement('span', { className: "text-yellow-500" }, songData.segue)
+                                                    ),
+                                                    React.createElement('div', { className: "flex items-center space-x-1" },
+                                                        songData.cover && React.createElement('span', { 
+                                                            className: "text-xs bg-purple-600 px-2 py-1 rounded text-white" 
+                                                        }, songData.cover),
+                                                        songData.note && React.createElement('span', { 
+                                                            className: "text-xs text-orange-400" 
+                                                        }, "*")
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        );
+                    })(),
+
+                    // Song Search and Filter
+                    React.createElement('div', { className: "mb-6" },
+                        React.createElement('div', { className: "flex flex-col sm:flex-row gap-4 mb-4" },
+                            React.createElement('div', { className: "flex-1 relative" },
+                                React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+                                React.createElement('input', {
+                                    type: "text",
+                                    placeholder: "Search songs...",
+                                    value: searchTerm,
+                                    onChange: (e) => setSearchTerm(e.target.value),
+                                    className: "w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                })
+                            ),
+                            React.createElement('div', { className: "relative" },
+                                React.createElement(Filter, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+                                React.createElement('select', {
+                                    value: filterBy,
+                                    onChange: (e) => setFilterBy(e.target.value),
+                                    className: "pl-10 pr-8 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                },
+                                    React.createElement('option', { value: "all" }, "All Songs"),
+                                    React.createElement('option', { value: "opener" }, "Show Openers"),
+                                    React.createElement('option', { value: "encore" }, "Encore Songs"),
+                                    React.createElement('option', { value: "cover" }, "Cover Songs")
+                                )
+                            )
+                        )
+                    ),
+
+                    // Song List
+                    React.createElement('div', { className: "bg-gray-800/50 rounded-lg p-6 border border-gray-600" },
+                        React.createElement('h2', { className: "text-2xl font-bold mb-4 text-yellow-400" },
+                            `Songs Performed (${filteredSongs.length})`
+                        ),
+                        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
+                            filteredSongs.map((song, index) =>
+                                React.createElement('div', { key: index, className: "bg-gray-900/50 rounded-lg p-4 hover:bg-gray-900/70 transition-colors" },
+                                    React.createElement('div', { className: "flex items-start justify-between mb-2" },
+                                        React.createElement('h3', { className: "font-semibold text-white" }, song.name),
+                                        React.createElement('span', { className: "text-xs bg-blue-600 px-2 py-1 rounded text-white" },
+                                            `${song.performances.length}x`
+                                        )
+                                    ),
+                                    song.cover && React.createElement('div', { className: "text-xs text-purple-400 mb-2" },
+                                        `Cover: ${song.cover}`
+                                    ),
+                                    React.createElement('div', { className: "space-y-1" },
+                                        song.performances.map((perf, perfIndex) =>
+                                            React.createElement('div', { key: perfIndex, className: "text-xs text-gray-400" },
+                                                React.createElement('span', { className: "text-yellow-500" }, perf.date),
+                                                ` • ${perf.setType}`,
+                                                perf.note && React.createElement('span', { className: "text-orange-400" }, ` • ${perf.note}`)
+                                            )
+                                        )
+                                    ),
+                                    React.createElement('div', { className: "flex gap-1 mt-2" },
+                                        song.isOpener && React.createElement('span', { 
+                                            className: "text-xs bg-green-600 px-2 py-1 rounded text-white" 
+                                        }, "Opener"),
+                                        song.isEncore && React.createElement('span', { 
+                                            className: "text-xs bg-red-600 px-2 py-1 rounded text-white" 
+                                        }, "Encore")
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(React.createElement(DeadCompanySetlists), document.getElementById('root'));
+    </script>
 </body>
 </html>
